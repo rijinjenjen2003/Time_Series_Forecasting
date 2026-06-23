@@ -1,33 +1,60 @@
 import streamlit as st
 import pandas as pd
-import pickle
 import matplotlib.pyplot as plt
-# Title
+from prophet import Prophet
+
 st.title("📈 Sales Forecast App")
 
-# Load Model
-with open("prophet_model.pkl", "rb") as f:
-    model = pickle.load(f)
+# Load Data
+df = pd.read_csv("train.csv")
 
-st.success("Model Loaded Successfully")
+df["date"] = pd.to_datetime(df["date"])
 
-# Forecast Days
+daily_sales = (
+    df.groupby("date")["sales"]
+    .sum()
+    .reset_index()
+)
+
+daily_sales.columns = ["ds", "y"]
+
+# Train Model
+model = Prophet()
+model.fit(daily_sales)
+
+# Slider
 days = st.slider(
-    "Select Forecast Days",
+    "Forecast Days",
     7,
     90,
     30
 )
 
-# Create Future Dates
+# Future Dates
 future = model.make_future_dataframe(
     periods=days
 )
 
-# Predict
+# Prediction
 forecast = model.predict(future)
 
-# Show Results
+# Small Graph
+st.subheader("📈 Forecast Graph")
+
+fig, ax = plt.subplots(figsize=(6,3))
+
+ax.plot(
+    forecast["ds"].tail(days),
+    forecast["yhat"].tail(days)
+)
+
+ax.set_title("Future Sales")
+ax.set_xlabel("Date")
+ax.set_ylabel("Sales")
+
+st.pyplot(fig)
+
+# Table
 st.subheader("Forecast Results")
 
 st.dataframe(
@@ -35,21 +62,4 @@ st.dataframe(
         ["ds", "yhat"]
     ].tail(days)
 )
-
-st.subheader("📈 Actual vs Forecast")
-
-fig, ax = plt.subplots(figsize=(12, 5))
-
-# Forecast
-ax.plot(
-    forecast["ds"],
-    forecast["yhat"],
-    label="Forecast"
-)
-
-ax.set_title("Sales Forecast")
-ax.set_xlabel("Date")
-ax.set_ylabel("Sales")
-ax.legend()
-
 st.pyplot(fig)
