@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 st.title("📈 Sales Forecast App")
 
 # Load Model
-with open("model/prophet_model.pkl", "rb") as f:
+with open("prophet_model.pkl", "rb") as f:
     model = pickle.load(f)
 
 st.success("Model Loaded Successfully")
