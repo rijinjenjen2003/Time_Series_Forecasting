@@ -27,19 +27,7 @@ future = model.make_future_dataframe(
 # Predict
 forecast = model.predict(future)
 
-# Graph
-st.subheader("📈 Forecast Graph")
 
-fig, ax = plt.subplots(figsize=(6, 3))
-
-ax.plot(
-    forecast["ds"].tail(days),
-    forecast["yhat"].tail(days)
-)
-
-ax.set_title("Future Sales Forecast")
-
-st.pyplot(fig)
 
 # Table
 st.subheader("Forecast Results")
